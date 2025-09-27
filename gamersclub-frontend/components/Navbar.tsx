@@ -27,39 +27,13 @@ export default function Navbar() {
   const [cartOpen, setCartOpen] = useState(false);
   const [cart, setCart] = useState<Game[]>([]);
 
-  // Pega carrinho do localStorage
-useEffect(() => {
-  async function fetchGames() {
-    console.log("🔍 Buscando jogos do Supabase...");
-    const { data, error } = await supabase
-      .from("games")
-      .select("id, title, price, image");
-
-    if (error) {
-      console.error("❌ Erro ao buscar jogos do Supabase:", error);
-    } else {
-      console.log("✅ Jogos recebidos do Supabase:", data);
-      setGames(data || []);
-    }
-  }
-  fetchGames();
-}, []);
-
-
-  // Busca jogos do Supabase
   useEffect(() => {
     async function fetchGames() {
-      console.log("🔍 Buscando jogos do Supabase...");
       const { data, error } = await supabase
         .from("games")
         .select("id, title, price, image");
-
-      if (error) {
-        console.error("❌ Erro ao buscar jogos do Supabase:", error);
-      } else {
-        console.log("✅ Jogos recebidos do Supabase:", data);
-        setGames(data || []);
-      }
+      if (error) console.error("❌ Erro ao buscar jogos do Supabase:", error);
+      else setGames(data || []);
     }
     fetchGames();
   }, []);
@@ -68,13 +42,11 @@ useEffect(() => {
   useEffect(() => {
     if (!searchTerm.trim()) {
       setSearchResults([]);
-      console.log("🔍 Pesquisa limpa, resultados zerados");
       return;
     }
     const filtered = games.filter((g) =>
       g.title.toLowerCase().includes(searchTerm.toLowerCase())
     );
-    console.log("🔍 Resultados filtrados para:", searchTerm, filtered);
     setSearchResults(filtered);
   }, [searchTerm, games]);
 
@@ -104,7 +76,7 @@ useEffect(() => {
               {genres.map((genre, i) => (
                 <Link
                   key={i}
-                  href={`/games?genre=${genre}`}
+                  href={`/genre/${genre}`} // Agora vai para /genre/[genre]
                   className="block px-4 py-2 text-white hover:bg-gray-600"
                 >
                   {genre}
@@ -180,7 +152,7 @@ useEffect(() => {
           {user ? (
             <div className="relative group">
               <span className="text-gray-300 hover:text-blue-400 cursor-pointer">
-                Olá, {user.nickname || user.name} 💰 €
+                Olá, {user.nickname || user.name} 💰 €{" "}
                 {user.balance?.toFixed(2) || "0"}
               </span>
               <div className="absolute right-0 mt-2 w-48 bg-gray-700 rounded-md shadow-lg z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200">

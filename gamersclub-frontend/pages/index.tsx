@@ -21,13 +21,25 @@ export default function Home() {
   const formatPrice = (price: number | null) =>
     price === 0 ? "Free" : price?.toFixed(2) + " €";
 
+  // Função para pegar jogos aleatórios sem repetir
+  const getRandomGames = (games: any[], count: number, excludeIds: string[] = []) => {
+    const filtered = games.filter((g) => !excludeIds.includes(g.id));
+    const shuffled = filtered.sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
+  };
+
   useEffect(() => {
     async function fetchGames() {
       const { data, error } = await supabase.from("games").select("*");
       if (error) return console.error("Erro Supabase:", error);
 
+      const usedIds: string[] = [];
+
+      // Hero Games
+      const hero = getRandomGames(data, 5);
+      hero.forEach((g) => usedIds.push(g.id));
       setHeroGames(
-        data.sort(() => 0.5 - Math.random()).slice(0, 5).map((g) => ({
+        hero.map((g) => ({
           id: g.id,
           name: g.title,
           image: g.image,
@@ -36,32 +48,11 @@ export default function Home() {
         }))
       );
 
-      const grouped: { [genre: string]: any[] } = {};
-      genres.forEach((genre) => {
-        grouped[genre] = data
-          .filter((g) => g.category === genre)
-          .map((g) => ({
-            id: g.id,
-            name: g.title,
-            image: g.image,
-            price: formatPrice(g.price),
-            description: g.description,
-          }));
-      });
-      setGamesByGenre(grouped);
-
-      setEmBreve(
-        data.slice(-5).map((g) => ({
-          id: g.id,
-          name: g.title,
-          image: g.image,
-          price: formatPrice(g.price),
-          description: g.description,
-        }))
-      );
-
+      // Mais Vendidos
+      const maisVendidosGames = getRandomGames(data, 6, usedIds);
+      maisVendidosGames.forEach((g) => usedIds.push(g.id));
       setMaisVendidos(
-        data.sort(() => 0.5 - Math.random()).slice(0, 6).map((g) => ({
+        maisVendidosGames.map((g) => ({
           id: g.id,
           title: g.title,
           image: g.image,
@@ -70,8 +61,11 @@ export default function Home() {
         }))
       );
 
+      // Ofertas
+      const ofertasGames = getRandomGames(data, 6, usedIds);
+      ofertasGames.forEach((g) => usedIds.push(g.id));
       setOfertas(
-        data.slice(0, 6).map((g) => ({
+        ofertasGames.map((g) => ({
           id: g.id,
           title: g.title,
           image: g.image,
@@ -82,8 +76,11 @@ export default function Home() {
         }))
       );
 
+      // Gratuitos
+      const gratisGames = data.filter((g) => g.price === 0 && !usedIds.includes(g.id));
+      gratisGames.forEach((g) => usedIds.push(g.id));
       setGratis(
-        data.filter((g) => g.price === 0).map((g) => ({
+        gratisGames.map((g) => ({
           id: g.id,
           title: g.title,
           image: g.image,
@@ -92,8 +89,11 @@ export default function Home() {
         }))
       );
 
+      // Recomendados
+      const recomendadosGames = getRandomGames(data, 6, usedIds);
+      recomendadosGames.forEach((g) => usedIds.push(g.id));
       setRecomendados(
-        data.sort(() => 0.5 - Math.random()).slice(0, 6).map((g) => ({
+        recomendadosGames.map((g) => ({
           id: g.id,
           title: g.title,
           image: g.image,
@@ -101,6 +101,34 @@ export default function Home() {
           description: g.description,
         }))
       );
+
+      // Em Breve (últimos 5 lançamentos)
+      const emBreveGames = data.slice(-5).filter((g) => !usedIds.includes(g.id));
+      emBreveGames.forEach((g) => usedIds.push(g.id));
+      setEmBreve(
+        emBreveGames.map((g) => ({
+          id: g.id,
+          name: g.title,
+          image: g.image,
+          price: formatPrice(g.price),
+          description: g.description,
+        }))
+      );
+
+      // Por gênero
+      const grouped: { [genre: string]: any[] } = {};
+      genres.forEach((genre) => {
+        grouped[genre] = data
+          .filter((g) => g.category === genre && !usedIds.includes(g.id))
+          .map((g) => ({
+            id: g.id,
+            name: g.title,
+            image: g.image,
+            price: formatPrice(g.price),
+            description: g.description,
+          }));
+      });
+      setGamesByGenre(grouped);
     }
 
     fetchGames();
@@ -180,7 +208,7 @@ export default function Home() {
           </section>
         )}
 
-        {/* Seções de jogos */}
+        {/* Outras seções */}
         <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8 }}>
           <h2 className="text-3xl font-bold mb-4 border-l-4 border-blue-600 pl-3">📈 Mais Vendidos</h2>
           <GameCarousel
