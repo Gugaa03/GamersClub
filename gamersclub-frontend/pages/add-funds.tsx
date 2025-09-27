@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAuth } from "@/lib/AuthContext";
+import { CreditCard, Calendar, Lock, Mail } from "lucide-react";
 
 const predefinedAmounts = [5, 10, 20, 50];
 
@@ -37,7 +38,6 @@ export default function AddFundsPage() {
     setLoading(true);
     try {
       await addFunds(selectedAmount!);
-
       alert(`€${selectedAmount!.toFixed(2)} adicionados à sua conta!`);
 
       setSelectedAmount(null);
@@ -59,16 +59,18 @@ export default function AddFundsPage() {
         💳 Adicionar Fundos
       </h1>
 
-      <div className="bg-gray-800/60 backdrop-blur-md border border-gray-700 p-8 rounded-2xl shadow-2xl w-full max-w-md space-y-6">
+      <div className="bg-gray-800/60 backdrop-blur-xl border border-gray-700 p-8 rounded-2xl shadow-2xl w-full max-w-md space-y-6">
         {step === "selectAmount" && (
           <>
-            <h2 className="text-xl font-semibold mb-4">Escolha um valor</h2>
+            <h2 className="text-xl font-semibold mb-4">
+              Escolha um valor 
+            </h2>
             <div className="flex gap-3 flex-wrap">
               {predefinedAmounts.map((amount) => (
                 <button
                   key={amount}
                   onClick={() => setSelectedAmount(amount)}
-                  className={`px-6 py-3 rounded-xl font-semibold transition transform hover:scale-105 shadow-md ${
+                  className={`px-6 py-3 rounded-xl font-semibold transition transform hover:scale-105 shadow-md flex-1 min-w-[45%] ${
                     selectedAmount === amount
                       ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
                       : "bg-gray-700 text-gray-300 hover:bg-gray-600"
@@ -109,40 +111,52 @@ export default function AddFundsPage() {
 
             {paymentMethod === "card" && (
               <>
-                <input
-                  type="text"
-                  placeholder="Número do cartão"
-                  value={cardNumber}
-                  onChange={(e) => setCardNumber(e.target.value)}
-                  className="w-full px-4 py-3 rounded-lg bg-gray-700/60 border border-gray-600 focus:border-blue-500 text-white mb-3"
-                />
+                <div className="relative mb-3">
+                  <CreditCard className="absolute left-3 top-3 text-gray-400" size={20} />
+                  <input
+                    type="text"
+                    placeholder="Número do cartão"
+                    value={cardNumber}
+                    onChange={(e) => setCardNumber(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 rounded-lg bg-gray-700/60 border border-gray-600 focus:border-blue-500 text-white"
+                  />
+                </div>
                 <div className="flex gap-3">
-                  <input
-                    type="text"
-                    placeholder="Validade (MM/AA)"
-                    value={cardExpiry}
-                    onChange={(e) => setCardExpiry(e.target.value)}
-                    className="w-1/2 px-4 py-3 rounded-lg bg-gray-700/60 border border-gray-600 focus:border-blue-500 text-white"
-                  />
-                  <input
-                    type="text"
-                    placeholder="CVV"
-                    value={cardCVV}
-                    onChange={(e) => setCardCVV(e.target.value)}
-                    className="w-1/2 px-4 py-3 rounded-lg bg-gray-700/60 border border-gray-600 focus:border-blue-500 text-white"
-                  />
+                  <div className="relative w-1/2">
+                    <Calendar className="absolute left-3 top-3 text-gray-400" size={20} />
+                    <input
+                      type="text"
+                      placeholder="Validade (MM/AA)"
+                      value={cardExpiry}
+                      onChange={(e) => setCardExpiry(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 rounded-lg bg-gray-700/60 border border-gray-600 focus:border-blue-500 text-white"
+                    />
+                  </div>
+                  <div className="relative w-1/2">
+                    <Lock className="absolute left-3 top-3 text-gray-400" size={20} />
+                    <input
+                      type="text"
+                      placeholder="CVV"
+                      value={cardCVV}
+                      onChange={(e) => setCardCVV(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 rounded-lg bg-gray-700/60 border border-gray-600 focus:border-blue-500 text-white"
+                    />
+                  </div>
                 </div>
               </>
             )}
 
             {paymentMethod === "paypal" && (
-              <input
-                type="email"
-                placeholder="Email do PayPal"
-                value={paypalEmail}
-                onChange={(e) => setPaypalEmail(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg bg-gray-700/60 border border-gray-600 focus:border-blue-500 text-white mb-4"
-              />
+              <div className="relative mb-3">
+                <Mail className="absolute left-3 top-3 text-gray-400" size={20} />
+                <input
+                  type="email"
+                  placeholder="Email do PayPal"
+                  value={paypalEmail}
+                  onChange={(e) => setPaypalEmail(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 rounded-lg bg-gray-700/60 border border-gray-600 focus:border-blue-500 text-white"
+                />
+              </div>
             )}
 
             <button
@@ -151,8 +165,8 @@ export default function AddFundsPage() {
               className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-5 py-3 rounded-xl font-bold text-lg transition transform hover:scale-105 disabled:opacity-50"
             >
               {loading
-                ? "Processando..."
-                : `Confirmar pagamento de €${selectedAmount?.toFixed(2)}`}
+                ? "🔄 Processando..."
+                : `✅ Confirmar pagamento de €${selectedAmount?.toFixed(2)}`}
             </button>
 
             <button

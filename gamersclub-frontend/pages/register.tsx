@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 
 export default function Register() {
@@ -5,8 +7,11 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
+  const [isError, setIsError] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
+    setLoading(true);
     try {
       const res = await fetch("http://localhost:4000/signup", {
         method: "POST",
@@ -17,52 +22,71 @@ export default function Register() {
       const data = await res.json();
 
       if (!res.ok) {
+        setIsError(true);
         setMessage(data.error || "Erro ao registrar");
       } else {
-        setMessage(`Registro realizado! Bem-vindo(a), ${data.name}`);
+        setIsError(false);
+        setMessage(`✅ Registro realizado! Bem-vindo(a), ${data.name}`);
       }
     } catch (err) {
-      setMessage("Erro na conexão com o servidor");
+      setIsError(true);
+      setMessage("❌ Erro na conexão com o servidor");
     }
+    setLoading(false);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900">
-      <div className="bg-gray-800 p-8 rounded-xl shadow-lg w-full max-w-md text-white">
-        <h1 className="text-3xl font-bold mb-6 text-center">Registro GamersClub</h1>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white px-4">
+      <div className="bg-gray-800/70 backdrop-blur-md p-8 rounded-2xl shadow-2xl w-full max-w-md">
+        {/* Header */}
+        <h1 className="text-4xl font-extrabold mb-6 text-center bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+          Registro GamersClub
+        </h1>
 
+        {/* Inputs */}
         <input
           type="text"
-          placeholder="Nome"
+          placeholder="👤 Nome"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full p-3 mb-4 rounded bg-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full p-3 mb-4 rounded-xl bg-gray-700/60 border border-gray-600 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
         />
 
         <input
           type="email"
-          placeholder="Email"
+          placeholder="📧 Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-3 mb-4 rounded bg-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full p-3 mb-4 rounded-xl bg-gray-700/60 border border-gray-600 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
         />
 
         <input
           type="password"
-          placeholder="Senha"
+          placeholder="🔒 Senha"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-3 mb-6 rounded bg-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full p-3 mb-6 rounded-xl bg-gray-700/60 border border-gray-600 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
         />
 
+        {/* Button */}
         <button
           onClick={handleRegister}
-          className="w-full bg-blue-600 hover:bg-blue-700 p-3 rounded font-semibold transition-colors"
+          disabled={loading}
+          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 p-3 rounded-xl font-semibold transition transform hover:scale-105 disabled:opacity-50"
         >
-          Registrar
+          {loading ? "🔄 Registrando..." : "🚀 Registrar"}
         </button>
 
-        {message && <p className="mt-4 text-center text-red-400">{message}</p>}
+        {/* Feedback */}
+        {message && (
+          <p
+            className={`mt-4 text-center font-medium ${
+              isError ? "text-red-400" : "text-green-400"
+            }`}
+          >
+            {message}
+          </p>
+        )}
       </div>
     </div>
   );
