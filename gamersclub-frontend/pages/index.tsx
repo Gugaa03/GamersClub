@@ -21,7 +21,6 @@ export default function Home() {
   const formatPrice = (price: number | null) =>
     price === 0 ? "Free" : price?.toFixed(2) + " €";
 
-  // Função para pegar jogos aleatórios sem repetir
   const getRandomGames = (games: any[], count: number, excludeIds: string[] = []) => {
     const filtered = games.filter((g) => !excludeIds.includes(g.id));
     const shuffled = filtered.sort(() => 0.5 - Math.random());
@@ -35,7 +34,6 @@ export default function Home() {
 
       const usedIds: string[] = [];
 
-      // Hero Games
       const hero = getRandomGames(data, 5);
       hero.forEach((g) => usedIds.push(g.id));
       setHeroGames(
@@ -48,7 +46,6 @@ export default function Home() {
         }))
       );
 
-      // Mais Vendidos
       const maisVendidosGames = getRandomGames(data, 6, usedIds);
       maisVendidosGames.forEach((g) => usedIds.push(g.id));
       setMaisVendidos(
@@ -61,7 +58,6 @@ export default function Home() {
         }))
       );
 
-      // Ofertas
       const ofertasGames = getRandomGames(data, 6, usedIds);
       ofertasGames.forEach((g) => usedIds.push(g.id));
       setOfertas(
@@ -76,7 +72,6 @@ export default function Home() {
         }))
       );
 
-      // Gratuitos
       const gratisGames = data.filter((g) => g.price === 0 && !usedIds.includes(g.id));
       gratisGames.forEach((g) => usedIds.push(g.id));
       setGratis(
@@ -89,7 +84,6 @@ export default function Home() {
         }))
       );
 
-      // Recomendados
       const recomendadosGames = getRandomGames(data, 6, usedIds);
       recomendadosGames.forEach((g) => usedIds.push(g.id));
       setRecomendados(
@@ -102,7 +96,6 @@ export default function Home() {
         }))
       );
 
-      // Em Breve (últimos 5 lançamentos)
       const emBreveGames = data.slice(-5).filter((g) => !usedIds.includes(g.id));
       emBreveGames.forEach((g) => usedIds.push(g.id));
       setEmBreve(
@@ -115,7 +108,6 @@ export default function Home() {
         }))
       );
 
-      // Por gênero
       const grouped: { [genre: string]: any[] } = {};
       genres.forEach((genre) => {
         grouped[genre] = data
@@ -157,151 +149,115 @@ export default function Home() {
       </div>
 
       <main className="pt-32 max-w-7xl mx-auto px-6 space-y-24">
-        {/* Hero */}
+        {/* Hero Section */}
         {heroGames.length > 0 && (
-          <section className="relative h-[550px] rounded-xl overflow-hidden shadow-2xl">
+          <section className="relative h-[600px] md:h-[700px] rounded-xl overflow-hidden shadow-2xl">
             <div
-              className="absolute inset-0 bg-cover bg-center blur-lg opacity-40"
+              className="absolute inset-0 bg-cover bg-center after:content-[''] after:absolute after:inset-0 after:bg-gradient-to-b after:from-black/40 after:to-black/70"
               style={{ backgroundImage: `url(${heroGames[selectedHero].image})` }}
             />
-            <div className="relative flex h-full">
-              <div className="flex flex-col space-y-4 w-40 p-2 z-10">
+            <div className="relative flex h-full items-center justify-between px-6 md:px-16">
+              <div className="flex flex-col space-y-4 w-44 md:w-60 z-20">
                 {heroGames.map((game, i) => (
                   <motion.img
-                    whileHover={{ scale: 1.05 }}
                     key={i}
+                    whileHover={{ scale: 1.1, rotate: 2 }}
                     src={game.image}
                     alt={game.name}
-                    className={`h-20 w-full object-cover rounded-lg cursor-pointer border-2 transition-all ${
-                      selectedHero === i ? "border-blue-500 shadow-lg" : "border-transparent"
+                    className={`h-24 md:h-32 w-full object-cover rounded-xl cursor-pointer border-2 transition-all ${
+                      selectedHero === i ? "border-blue-500 shadow-xl" : "border-transparent"
                     }`}
                     onClick={() => setSelectedHero(i)}
                   />
                 ))}
               </div>
 
-              <div className="flex-1 relative ml-6 rounded-xl overflow-hidden shadow-lg z-10">
+              <motion.div
+                className="flex-1 relative ml-6 rounded-xl overflow-hidden shadow-2xl z-20"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+              >
                 <img
                   src={heroGames[selectedHero].image}
                   alt={heroGames[selectedHero].name}
                   className="w-full h-full object-cover brightness-75"
                 />
-                <div className="absolute bottom-8 left-8 max-w-lg bg-black/50 backdrop-blur-sm p-6 rounded-lg">
-                  <h2 className="text-4xl font-extrabold drop-shadow-lg">
+                <div className="absolute bottom-8 left-8 max-w-lg bg-black/40 backdrop-blur-md p-6 rounded-xl border border-gray-700 shadow-lg">
+                  <h2 className="text-4xl md:text-5xl font-extrabold text-white drop-shadow-lg animate-pulse">
                     {heroGames[selectedHero].name}
                   </h2>
-                  <p className="mt-2 text-lg text-gray-200">
+                  <p className="mt-2 text-lg text-gray-200 font-semibold">
                     Preço: {heroGames[selectedHero].price}
                   </p>
-                  <p className="mt-2 text-gray-400 text-sm line-clamp-3">
-                    {heroGames[selectedHero].description}
-                  </p>
+                  <p className="mt-2 text-gray-300 text-sm line-clamp-3">{heroGames[selectedHero].description}</p>
                   <Link
                     href={`/games/${heroGames[selectedHero].id}`}
-                    className="mt-4 inline-block bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-6 py-3 rounded-lg text-lg font-semibold shadow-lg transition-transform transform hover:scale-105"
+                    className="mt-4 inline-block bg-gradient-to-r from-blue-500 via-purple-600 to-pink-500 hover:from-blue-600 hover:to-pink-600 px-6 py-3 rounded-2xl text-lg font-semibold shadow-xl transition-transform transform hover:scale-105"
                   >
                     🎮 Jogar Agora
                   </Link>
                 </div>
-              </div>
+              </motion.div>
             </div>
           </section>
         )}
 
-        {/* Outras seções */}
-        <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8 }}>
-          <h2 className="text-3xl font-bold mb-4 border-l-4 border-blue-600 pl-3">📈 Mais Vendidos</h2>
-          <GameCarousel
-            title="Mais Vendidos"
-            games={filterGames(maisVendidos).map((g) => ({
+        {/* Sections */}
+        <Section title="📈 Mais Vendidos" color="blue-600" games={filterGames(maisVendidos).map(g => ({
+          id: g.id,
+          name: g.title,
+          image: g.image,
+          price: g.price,
+          badge: "🔥 Popular",
+        }))} />
+
+        <Section title="💰 Ofertas Especiais" color="green-500" games={filterGames(ofertas).map(g => ({
+          id: g.id,
+          name: g.title,
+          image: g.image,
+          price: g.price,
+          badge: g.discount ? `-${g.discount}%` : undefined,
+        }))} />
+
+        {genres.map(genre =>
+          gamesByGenre[genre] && filterGames(gamesByGenre[genre]).length > 0 && (
+            <Section key={genre} title={genre} color="purple-500" games={filterGames(gamesByGenre[genre]).map(g => ({
               id: g.id,
-              name: g.title,
+              name: g.name,
               image: g.image,
               price: g.price,
-              badge: "🔥 Popular",
-            }))}
-          />
-        </motion.section>
-
-        <motion.section initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
-          <h2 className="text-3xl font-bold mb-4 border-l-4 border-green-500 pl-3">💰 Ofertas Especiais</h2>
-          <GameCarousel
-            title="Ofertas Especiais"
-            games={filterGames(ofertas).map((g) => ({
-              id: g.id,
-              name: g.title,
-              image: g.image,
-              price: g.price,
-              badge: g.discount ? `-${g.discount}%` : undefined,
-            }))}
-          />
-        </motion.section>
-
-        {genres.map(
-          (genre) =>
-            gamesByGenre[genre] &&
-            filterGames(gamesByGenre[genre]).length > 0 && (
-              <motion.section key={genre} whileHover={{ scale: 1.02 }}>
-                <h2 className="text-2xl sm:text-3xl font-bold mb-4 border-l-4 border-purple-500 pl-3">{genre}</h2>
-                <GameCarousel
-                  title={genre}
-                  games={filterGames(gamesByGenre[genre]).map((g) => ({
-                    id: g.id,
-                    name: g.name,
-                    image: g.image,
-                    price: g.price,
-                    badge: "Novo",
-                  }))}
-                />
-              </motion.section>
-            )
+              badge: "Novo",
+            }))} />
+          )
         )}
 
-        {emBreve.length > 0 && (
-          <section>
-            <h2 className="text-3xl font-bold mb-4 border-l-4 border-yellow-500 pl-3">⏳ Em Breve</h2>
-            <GameCarousel
-              title="Em Breve"
-              games={filterGames(emBreve).map((g) => ({
-                id: g.id,
-                name: g.name,
-                image: g.image,
-                price: g.price,
-                badge: "Exclusivo",
-              }))}
-            />
-          </section>
-        )}
+        <Section title="⏳ Em Breve" color="yellow-500" games={filterGames(emBreve).map(g => ({
+          id: g.id,
+          name: g.name,
+          image: g.image,
+          price: g.price,
+          badge: "Exclusivo",
+        }))} />
 
-        <section>
-          <h2 className="text-3xl font-bold mb-4 border-l-4 border-pink-500 pl-3">⭐ Recomendados</h2>
-          <GameCarousel
-            title="Recomendados"
-            games={filterGames(recomendados).map((g) => ({
-              id: g.id,
-              name: g.title,
-              image: g.image,
-              price: g.price,
-              badge: "✨ Recomendado",
-            }))}
-          />
-        </section>
+        <Section title="⭐ Recomendados" color="pink-500" games={filterGames(recomendados).map(g => ({
+          id: g.id,
+          name: g.title,
+          image: g.image,
+          price: g.price,
+          badge: "✨ Recomendado",
+        }))} />
 
-        <section>
-          <h2 className="text-3xl font-bold mb-4 border-l-4 border-cyan-500 pl-3">🎁 Jogos Gratuitos</h2>
-          <GameCarousel
-            title="Grátis"
-            games={filterGames(gratis).map((g) => ({
-              id: g.id,
-              name: g.title,
-              image: g.image,
-              price: g.price,
-              badge: "Free",
-            }))}
-          />
-        </section>
+        <Section title="🎁 Jogos Gratuitos" color="cyan-500" games={filterGames(gratis).map(g => ({
+          id: g.id,
+          name: g.title,
+          image: g.image,
+          price: g.price,
+          badge: "Free",
+        }))} />
       </main>
 
+      {/* Footer */}
       <footer className="bg-gray-900 border-t border-gray-700 text-gray-400 py-8 mt-16">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm">
@@ -317,3 +273,38 @@ export default function Home() {
     </div>
   );
 }
+
+// Reusable Section Component
+const Section = ({ title, color, games }: { title: string, color: string, games: any[] }) => {
+  return (
+    <motion.section
+      className="space-y-4"
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.7 }}
+      viewport={{ once: true }}
+    >
+      <h2 className={`text-3xl font-bold mb-4 border-l-4 pl-3 border-${color}`}>{title}</h2>
+      <div className="flex space-x-6 overflow-x-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-gray-800 p-2">
+        {games.map((g) => (
+          <motion.div
+            key={g.id}
+            whileHover={{ scale: 1.05, y: -5 }}
+            className="min-w-[180px] md:min-w-[220px] bg-black/30 backdrop-blur-md rounded-2xl overflow-hidden shadow-lg border border-gray-700 cursor-pointer transition-transform"
+          >
+            <img src={g.image} alt={g.name} className="w-full h-40 md:h-48 object-cover" />
+            <div className="p-4">
+              <h3 className="font-bold text-lg line-clamp-2">{g.name}</h3>
+              <p className="text-sm text-gray-300 mt-1">{g.price}</p>
+              {g.badge && (
+                <span className="inline-block mt-2 bg-gradient-to-r from-pink-500 via-purple-600 to-blue-500 text-xs font-semibold px-2 py-1 rounded-full animate-pulse">
+                  {g.badge}
+                </span>
+              )}
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </motion.section>
+  );
+};

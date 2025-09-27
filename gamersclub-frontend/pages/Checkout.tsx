@@ -9,13 +9,13 @@ export default function CheckoutPage() {
   const { cart, clearCart } = useCart();
   const [loading, setLoading] = useState(false);
 
-  // Garante que, se o cart estiver vazio, tente carregar do localStorage
+  // Recupera carrinho salvo
   useEffect(() => {
     if (cart.length === 0) {
       const savedCart = localStorage.getItem("cart");
       if (savedCart) {
         const parsed = JSON.parse(savedCart);
-        clearCart(); // Limpa antes de adicionar
+        clearCart();
         localStorage.setItem("cart", JSON.stringify(parsed));
       }
     }
@@ -24,34 +24,34 @@ export default function CheckoutPage() {
   const totalPrice = cart.reduce((acc, g) => acc + (g.price || 0), 0);
 
   const handlePurchase = async () => {
-    if (!user) return alert("Faça login primeiro!");
-    if (!user.id) return alert("Usuário sem ID definido.");
-    if ((user.balance || 0) < totalPrice) return alert("Saldo insuficiente!");
+    if (!user) return alert("⚠️ Faça login primeiro!");
+    if (!user.id) return alert("Usuário sem ID válido.");
+    if ((user.balance || 0) < totalPrice)
+      return alert("💸 Saldo insuficiente!");
 
     setLoading(true);
 
     try {
-      // Registrar todas as compras
+      // Inserir compras
       const inserts = cart.map((game) => ({
-        user_id: user.id, // deve existir na auth.users
+        user_id: user.id,
         game_id: game.id,
         price: Number(game.price),
       }));
-
-      const { error: purchaseError } = await supabase.from("purchases").insert(inserts);
+      const { error: purchaseError } = await supabase
+        .from("purchases")
+        .insert(inserts);
       if (purchaseError) throw purchaseError;
-      console.log("✅ Compras registradas no Supabase", inserts);
 
-      // Atualiza saldo diretamente
+      // Atualizar saldo
       const newBalance = (user.balance || 0) - totalPrice;
       const { error: balanceError } = await supabase
         .from("users")
         .update({ balance: newBalance })
         .eq("id", user.id);
       if (balanceError) throw balanceError;
-      console.log("💰 Saldo atualizado:", newBalance);
 
-      // Enviar email de recibo
+      // Email de recibo
       try {
         const response = await fetch("/api/send-email", {
           method: "POST",
@@ -62,22 +62,24 @@ export default function CheckoutPage() {
             html: `<h1>Obrigado pela compra!</h1>
                    <p>Você comprou os seguintes jogos:</p>
                    <ul>
-                     ${cart.map((g) => `<li>${g.title} - €${g.price.toFixed(2)}</li>`).join("")}
+                     ${cart
+                       .map(
+                         (g) => `<li>${g.title} - €${g.price.toFixed(2)}</li>`
+                       )
+                       .join("")}
                    </ul>
-                   <p>Total: €${totalPrice.toFixed(2)}</p>`,
+                   <p><strong>Total: €${totalPrice.toFixed(2)}</strong></p>`,
           }),
         });
-
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || "Erro ao enviar email");
-        console.log("📧 Email de recibo enviado com sucesso:", data);
+        console.log("📧 Email enviado:", data);
       } catch (emailErr) {
-        console.error("❌ Erro ao enviar email de recibo:", emailErr);
+        console.error("❌ Erro ao enviar email:", emailErr);
       }
 
-      // Limpa carrinho usando o método do contexto
       clearCart();
-      alert("Compra realizada com sucesso!");
+      alert("✅ Compra realizada com sucesso!");
     } catch (err) {
       console.error("❌ Erro ao registrar compra:", err);
       alert("Erro ao registrar a compra.");
@@ -87,32 +89,58 @@ export default function CheckoutPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-8">
-      <h1 className="text-3xl font-bold mb-6">Checkout</h1>
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-black text-white py-16 px-6">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-4xl font-extrabold mb-10 text-center bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+          🛒 Finalizar Compra
+        </h1>
 
-      <div className="space-y-4">
-        {cart.length === 0 && <p className="text-gray-400">Seu carrinho está vazio.</p>}
-        {cart.map((game) => (
-          <div
-            key={game.id}
-            className="flex items-center justify-between bg-gray-800 p-4 rounded-lg"
-          >
-            <img src={game.image} className="w-16 h-16 object-cover rounded" />
-            <span>{game.title}</span>
-            <span>€{game.price.toFixed(2)}</span>
+        {/* Lista de jogos no carrinho */}
+        <div className="space-y-4">
+          {cart.length === 0 ? (
+            <p className="text-gray-400 text-center text-lg">
+              📭 Seu carrinho está vazio.
+            </p>
+          ) : (
+            cart.map((game) => (
+              <div
+                key={game.id}
+                className="flex items-center justify-between bg-gray-800 p-4 rounded-xl shadow-md hover:shadow-blue-500/30 transition"
+              >
+                <div className="flex items-center gap-4">
+                  <img
+                    src={game.image}
+                    alt={game.title}
+                    className="w-16 h-16 object-cover rounded-lg shadow-md"
+                  />
+                  <span className="font-semibold">{game.title}</span>
+                </div>
+                <span className="text-blue-400 font-bold">
+                  €{game.price.toFixed(2)}
+                </span>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Total e botão */}
+        {cart.length > 0 && (
+          <div className="mt-10 bg-gray-800 rounded-2xl p-6 shadow-lg">
+            <div className="flex justify-between items-center text-xl font-bold mb-6">
+              <span>Total:</span>
+              <span className="text-green-400">
+                €{totalPrice.toFixed(2)}
+              </span>
+            </div>
+            <button
+              onClick={handlePurchase}
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-6 py-4 rounded-xl font-bold shadow-lg transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? "🔄 Processando..." : "✅ Confirmar Compra"}
+            </button>
           </div>
-        ))}
-      </div>
-
-      <div className="mt-6 flex justify-between items-center">
-        <span className="text-xl font-bold">Total: €{totalPrice.toFixed(2)}</span>
-        <button
-          onClick={handlePurchase}
-          disabled={loading || cart.length === 0}
-          className="bg-blue-600 hover:bg-blue-700 px-5 py-3 rounded-lg font-bold transition disabled:opacity-50"
-        >
-          {loading ? "Processando..." : "Comprar"}
-        </button>
+        )}
       </div>
     </div>
   );
