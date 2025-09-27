@@ -16,3 +16,8 @@ gamersclub-backend/build/
 
 # VSCode
 .vscode/
+node_modules/
+.env
+*.log
+/.next
+/dist
