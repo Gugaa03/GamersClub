@@ -79,6 +79,7 @@ Ainda não está finalizado, e estão a ser implementadas funcionalidades e pág
 ## Espaço reservado para algumas capturas de tela das funcionalidades implementadas.
 <img width="1872" height="850" alt="image" src="https://github.com/user-attachments/assets/9b0e18f8-7906-43ca-a05c-8b3ac255be19" />
 
-<img width="1876" height="776" alt="image" src="https://github.com/user-attachments/assets/7ae24fed-8996-4e72-8fb2-9da912f59980" />
+<img width="1876" height="776" alt="image" src="https://github.com/user-attachments/assets/9da7b28f-4400-4080-8022-dc1935b48cae" />
+
 
 
