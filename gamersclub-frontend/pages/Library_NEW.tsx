@@ -38,51 +38,33 @@ export default function Library() {
   }, [user]);
 
   const fetchLibrary = async () => {
-    if (!user) {
-      console.log("❌ Usuário não logado");
-      return;
-    }
+    if (!user) return;
 
-    console.log("🔍 Buscando biblioteca para user:", user.id);
     setLoading(true);
-    
     const { data, error } = await supabase
       .from("purchases")
       .select("game_id, created_at")
       .eq("user_id", user.id);
 
-    console.log("📦 Purchases encontradas:", data);
-
     if (error) {
-      console.error("❌ Erro ao buscar biblioteca:", error);
-      setLoading(false);
-      return;
-    }
-
-    if (!data || data.length === 0) {
-      console.log("📭 Nenhuma compra encontrada");
-      setGames([]);
+      console.error("Erro ao buscar biblioteca:", error);
       setLoading(false);
       return;
     }
 
     const gameIds = data.map((p: any) => p.game_id);
-    console.log("🎮 IDs dos jogos:", gameIds);
-    
     const { data: gamesData, error: gamesError } = await supabase
       .from("games")
       .select("*")
       .in("id", gameIds);
 
-    console.log("🎮 Jogos encontrados:", gamesData);
-
     if (gamesError) {
-      console.error("❌ Erro ao buscar jogos:", gamesError);
+      console.error("Erro ao buscar jogos:", gamesError);
       setLoading(false);
       return;
     }
 
-    const gamesWithPurchaseDate = (gamesData || []).map((game) => {
+    const gamesWithPurchaseDate = gamesData.map((game) => {
       const purchase = data.find((p: any) => p.game_id === game.id);
       return {
         ...game,
@@ -90,8 +72,7 @@ export default function Library() {
       };
     });
 
-    console.log("✅ Jogos finais com data:", gamesWithPurchaseDate);
-    setGames(gamesWithPurchaseDate);
+    setGames(gamesWithPurchaseDate || []);
     setLoading(false);
   };
 
@@ -363,93 +344,74 @@ const GridGameCard = ({ game, index }: { game: Game; index: number }) => {
       whileHover={{ y: -8 }}
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
-      className="group"
+      className="group relative"
     >
       <Link href={`/games/${game.id}`}>
-        <div className="relative rounded-xl overflow-hidden bg-gray-900/50 backdrop-blur-sm border border-gray-800/50 hover:border-blue-500/50 transition-all duration-300 shadow-lg hover:shadow-blue-500/20">
-          {/* Image Container */}
-          <div className="relative w-full aspect-video overflow-hidden bg-gradient-to-br from-gray-800 to-gray-900">
-            <img
+        <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-gray-900 to-black shadow-2xl hover:shadow-blue-500/20 transition-all">
+          {/* Image */}
+          <div className="relative aspect-[3/4] overflow-hidden">
+            <motion.img
               src={game.image}
               alt={game.title}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              onError={(e) => {
-                e.currentTarget.src = `https://via.placeholder.com/600x340/1f2937/3b82f6?text=${encodeURIComponent(game.title)}`;
-              }}
+              className="w-full h-full object-cover"
+              animate={{ scale: isHovered ? 1.1 : 1 }}
+              transition={{ duration: 0.6 }}
             />
             
-            {/* Gradient Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/20 to-transparent opacity-60" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
 
-            {/* Owned Badge */}
-            <div className="absolute top-3 right-3">
-              <span className="px-3 py-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-bold rounded-lg shadow-lg flex items-center gap-1">
-                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                NA BIBLIOTECA
-              </span>
-            </div>
-
-            {/* Hover Play Button */}
+            {/* Play Button Overlay */}
             <AnimatePresence>
               {isHovered && (
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center"
                 >
                   <motion.div
-                    initial={{ y: 20 }}
-                    animate={{ y: 0 }}
-                    className="flex flex-col items-center gap-3"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0 }}
+                    className="p-6 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full shadow-2xl"
                   >
-                    <div className="p-4 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full shadow-2xl">
-                      <Play className="w-8 h-8 text-white fill-white" />
-                    </div>
-                    <span className="text-white font-bold text-sm">JOGAR AGORA</span>
+                    <Play className="w-12 h-12 text-white fill-white" />
                   </motion.div>
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
 
-          {/* Content */}
-          <div className="p-4 space-y-3">
-            {/* Title */}
-            <h3 className="font-bold text-base text-white line-clamp-2 min-h-[3rem] leading-snug">
+          {/* Info */}
+          <div className="p-6">
+            <h3 className="font-black text-xl mb-3 line-clamp-1 text-white">
               {game.title}
             </h3>
+            
+            {game.purchased_at && (
+              <div className="flex items-center gap-2 text-sm text-gray-400 mb-3">
+                <Calendar className="w-4 h-4" />
+                {new Date(game.purchased_at).toLocaleDateString("pt-PT", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                })}
+              </div>
+            )}
 
-            {/* Category & Purchase Date */}
-            <div className="flex items-center justify-between text-xs">
-              {game.category && (
-                <span className="px-2 py-1 bg-gray-800/80 text-gray-300 font-semibold rounded-md">
-                  {game.category}
-                </span>
-              )}
-              {game.purchased_at && (
-                <div className="flex items-center gap-1 text-gray-400">
-                  <Calendar className="w-3.5 h-3.5" />
-                  <span>{new Date(game.purchased_at).toLocaleDateString("pt-PT", { day: "2-digit", month: "short" })}</span>
-                </div>
-              )}
+            <div className="flex items-center justify-between">
+              <span className="px-3 py-1 bg-blue-600/20 border border-blue-500/50 rounded-lg text-blue-400 text-sm font-bold">
+                {game.category || "Geral"}
+              </span>
+              
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                className="p-2 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 transition"
+              >
+                <Play className="w-5 h-5 text-white" />
+              </motion.button>
             </div>
-
-            {/* Play Button */}
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={(e) => {
-                e.preventDefault();
-                // Aqui você pode adicionar a lógica para jogar
-              }}
-              className="w-full px-4 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 rounded-lg text-white font-bold text-sm shadow-lg shadow-blue-500/30 transition-all flex items-center justify-center gap-2"
-            >
-              <Play className="w-4 h-4 fill-white" />
-              JOGAR AGORA
-            </motion.button>
           </div>
         </div>
       </Link>

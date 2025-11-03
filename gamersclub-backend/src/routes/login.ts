@@ -2,6 +2,10 @@
 import { Router } from "express";
 import bcrypt from "bcrypt";
 import { supabase } from "./supabaseClient.ts";
+import { asyncHandler, AppError } from "../middleware/errorHandler.ts";
+import { validateLoginData } from "../middleware/validation.ts";
+import { authLimiter } from "../middleware/rateLimiter.ts";
+import type { LoginRequest } from "../types/index.ts";
 
 
 
@@ -49,56 +53,42 @@ import { supabase } from "./supabaseClient.ts";
 
 const router = Router();
 
-router.post("/", async (req, res) => {
-  const { email, password } = req.body;
+router.post("/", authLimiter, validateLoginData, asyncHandler(async (req, res) => {
+  const { email, password }: LoginRequest = req.body;
 
-  console.log("🔹 Recebendo login:", { email });
+  console.log("🔹 Tentativa de login:", { email });
 
-  if (!email || !password) {
-    console.log("⚠️ Campos faltando");
-    return res.status(400).json({ error: "Todos os campos são obrigatórios" });
+  // Buscar usuário no Supabase pelo email
+  const { data, error } = await supabase
+    .from("users")
+    .select("*")
+    .eq("email", email)
+    .single();
+
+  if (error || !data) {
+    console.log("⚠️ Usuário não encontrado:", email);
+    throw new AppError("Credenciais inválidas", 401);
   }
 
-  try {
-    // Buscar usuário no Supabase pelo email
-    const { data, error } = await supabase
-      .from("users")
-      .select("*")
-      .eq("email", email)
-      .single();
+  console.log("🔹 Usuário encontrado:", data.email, "ID:", data.id);
 
-    if (error) {
-      console.log("❌ Erro ao buscar usuário:", error);
-      return res.status(400).json({ error: "Usuário não encontrado" });
-    }
-
-    if (!data) {
-      console.log("⚠️ Usuário não encontrado");
-      return res.status(400).json({ error: "Usuário não encontrado" });
-    }
-
-    console.log("🔹 Usuário encontrado:", data.email, "ID:", data.id);
-
-    // Comparar senha
-    const validPassword = await bcrypt.compare(password, data.password);
-    if (!validPassword) {
-      console.log("⚠️ Senha incorreta para:", email);
-      return res.status(400).json({ error: "Senha incorreta" });
-    }
-
-    console.log("✅ Login bem-sucedido para:", email);
-
-    // Retornar dados do usuário, incluindo ID e balance
-    res.json({
-      id: data.id,
-      name: data.name,
-      email: data.email,
-      balance: data.balance || 0,
-    });
-  } catch (err) {
-    console.error("❌ Erro no login:", err);
-    res.status(500).json({ error: "Erro ao fazer login" });
+  // Comparar senha
+  const validPassword = await bcrypt.compare(password, data.password);
+  if (!validPassword) {
+    console.log("⚠️ Senha incorreta para:", email);
+    throw new AppError("Credenciais inválidas", 401);
   }
-});
+
+  console.log("✅ Login bem-sucedido para:", email);
+
+  // Retornar dados do usuário (não retornar senha)
+  res.json({
+    id: data.id,
+    name: data.name,
+    email: data.email,
+    balance: data.balance || 0,
+    nickname: data.nickname,
+  });
+}));
 
 export default router;

@@ -23,3 +23,10 @@ node_modules/
 *.log
 /.next
 /dist
+
+# Documentation and SQL files (ignore all .md and .sql)
+*.md
+*.sql
+
+# Exception: Keep README.md in root
+!README.md

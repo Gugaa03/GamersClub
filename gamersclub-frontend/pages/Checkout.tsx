@@ -32,57 +32,60 @@ export default function CheckoutPage() {
     setLoading(true);
 
     try {
+      console.log("🛒 Iniciando compra...", {
+        user_id: user.id,
+        total: totalPrice,
+        items: cart.length
+      });
+
       // Inserir compras
       const inserts = cart.map((game) => ({
         user_id: user.id,
         game_id: game.id,
         price: Number(game.price),
       }));
-      const { error: purchaseError } = await supabase
+      
+      console.log("📦 Inserindo compras:", inserts);
+      
+      const { data: purchaseData, error: purchaseError } = await supabase
         .from("purchases")
-        .insert(inserts);
-      if (purchaseError) throw purchaseError;
+        .insert(inserts)
+        .select();
+        
+      if (purchaseError) {
+        console.error("❌ Erro ao inserir compras:", purchaseError);
+        throw purchaseError;
+      }
+      
+      console.log("✅ Compras inseridas:", purchaseData);
 
       // Atualizar saldo
       const newBalance = (user.balance || 0) - totalPrice;
+      console.log("💰 Atualizando saldo:", { old: user.balance, new: newBalance });
+      
       const { error: balanceError } = await supabase
         .from("users")
         .update({ balance: newBalance })
         .eq("id", user.id);
-      if (balanceError) throw balanceError;
-
-      // Email de recibo
-      try {
-        const response = await fetch("/api/send-email", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            recipient: user.email,
-            subject: "Recibo da sua compra",
-            html: `<h1>Obrigado pela compra!</h1>
-                   <p>Você comprou os seguintes jogos:</p>
-                   <ul>
-                     ${cart
-                       .map(
-                         (g) => `<li>${g.title} - €${g.price.toFixed(2)}</li>`
-                       )
-                       .join("")}
-                   </ul>
-                   <p><strong>Total: €${totalPrice.toFixed(2)}</strong></p>`,
-          }),
-        });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || "Erro ao enviar email");
-        console.log("📧 Email enviado:", data);
-      } catch (emailErr) {
-        console.error("❌ Erro ao enviar email:", emailErr);
+        
+      if (balanceError) {
+        console.error("❌ Erro ao atualizar saldo:", balanceError);
+        throw balanceError;
       }
+      
+      console.log("✅ Saldo atualizado");
 
+      // Limpar carrinho
       clearCart();
-      alert("✅ Compra realizada com sucesso!");
-    } catch (err) {
+      localStorage.removeItem("cart");
+      
+      alert("✅ Compra realizada com sucesso! Confira sua biblioteca.");
+      
+      // Redirecionar para biblioteca
+      window.location.href = "/Library";
+    } catch (err: any) {
       console.error("❌ Erro ao registrar compra:", err);
-      alert("Erro ao registrar a compra.");
+      alert(`Erro ao registrar a compra: ${err.message || 'Erro desconhecido'}`);
     }
 
     setLoading(false);

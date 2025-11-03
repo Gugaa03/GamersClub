@@ -2,8 +2,13 @@
 import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
 import swaggerUi from "swagger-ui-express";
 import swaggerJsdoc from "swagger-jsdoc";
+
+// Middleware
+import { errorHandler } from "./middleware/errorHandler.ts";
+import { apiLimiter } from "./middleware/rateLimiter.ts";
 
 // Rotas
 import signupRouter from "./routes/signup.ts";
@@ -14,21 +19,34 @@ import updateemailRouter from "./routes/updateemail.ts";
 import updatepasswordRouter from "./routes/updatepassword.ts";
 import updateUserRouter from "./routes/updateUser.ts";
 import sendemailRouter from "./routes/sendemail.ts";
+import passwordResetRouter from "./routes/passwordReset.js";
+
 dotenv.config();
 
 const app = express();
-const PORT = 4000;
+const PORT = process.env.PORT || 4000;
 
 // =======================
-// Middleware
+// Middleware de Segurança
 // =======================
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(helmet()); // Adiciona headers de segurança
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || "http://localhost:3000",
+  credentials: true,
+}));
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+
+// Rate limiting global
+app.use("/api/", apiLimiter);
 
 // Logging middleware
 app.use((req, res, next) => {
-  console.log(`📝 [${req.method}] ${req.originalUrl} - Body:`, req.body);
+  const timestamp = new Date().toISOString();
+  console.log(`📝 [${timestamp}] [${req.method}] ${req.originalUrl}`);
+  if (Object.keys(req.body).length > 0) {
+    console.log(`   Body:`, req.body);
+  }
   next();
 });
 
@@ -43,6 +61,7 @@ app.use("/api/updateemail", updateemailRouter);
 app.use("/api/updatepassword", updatepasswordRouter);
 app.use("/api/updateUser", updateUserRouter);
 app.use("/api/sendemail", sendemailRouter); // rota para envio de email
+app.use("/api", passwordResetRouter); // rotas de recuperação de senha
 app.get("/", (req, res) => {
   res.send("GamersClub Backend rodando!");
 });
@@ -71,9 +90,15 @@ const swaggerSpec = swaggerJsdoc(swaggerOptions);
 app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // =======================
+// Error Handler (deve ser o último middleware)
+// =======================
+app.use(errorHandler);
+
+// =======================
 // Start server
 // =======================
 app.listen(PORT, () => {
-  console.log(`Servidor rodando em http://localhost:${PORT}`);
-  console.log(`Swagger UI disponível em http://localhost:${PORT}/api/docs`);
+  console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
+  console.log(`📚 Swagger UI disponível em http://localhost:${PORT}/api/docs`);
+  console.log(`🌍 Ambiente: ${process.env.NODE_ENV || "development"}`);
 });

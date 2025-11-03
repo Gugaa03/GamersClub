@@ -1,0 +1,86 @@
+# ⚡ CONFIGURAÇÃO RESEND - COPIAR E COLAR
+
+## 📋 Dados para o Supabase SMTP Settings
+
+Copia e cola EXATAMENTE estes valores no Supabase:
+
+---
+
+### ✅ Enable Custom SMTP
+**Ativa esta opção primeiro!**
+
+---
+
+### 📧 Sender Details
+
+**Sender email:**
+```
+onboarding@resend.dev
+```
+
+**Sender name:**
+```
+GamersClub
+```
+
+---
+
+### 🔧 SMTP Provider Settings
+
+**Host:**
+```
+smtp.resend.com
+```
+
+**Port number:**
+```
+587
+```
+
+**Username:**
+```
+resend
+```
+
+**Password:**
+```
+re_SENz5rmd_NE8QBrcL2ApweT1awd9LJveU
+```
+
+**Minimum interval between emails:**
+```
+60
+```
+(deixa como está)
+
+---
+
+## 🎯 IMPORTANTE
+
+- ✅ Porta **587** (NÃO 465!)
+- ✅ Username é literalmente "resend"
+- ✅ Password é a tua API Key
+- ✅ Email sender: onboarding@resend.dev (domínio do Resend)
+
+---
+
+## 💾 DEPOIS DE SALVAR
+
+1. Clica em **"Save"**
+2. Aguarda confirmação
+3. Vai para: http://localhost:3001/login
+4. Testa "Esqueceu a senha?"
+5. **Email vai chegar REAL na caixa de entrada!** 📧
+
+---
+
+## 📬 O Email vai:
+
+- **De:** GamersClub <onboarding@resend.dev>
+- **Para:** guga090403@gmail.com
+- **Assunto:** Reset Password
+- **Conteúdo:** Botão "Reset Password" + link
+
+---
+
+**Pronto para configurar!** 🚀

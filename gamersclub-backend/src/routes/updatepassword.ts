@@ -34,11 +34,30 @@ router.post("/", async (req, res) => {
       .eq("id", userId);
 
     if (error) {
-      console.error("❌ /resetPassword: Erro ao atualizar senha:", error);
+      console.error("❌ /resetPassword: Erro ao atualizar senha na tabela users:", error);
       return res.status(400).json({ error: error.message });
     }
 
-    console.log("✅ /resetPassword: Senha atualizada com sucesso na tabela users:", data);
+    console.log("✅ /resetPassword: Senha atualizada com sucesso na tabela users");
+
+    // Atualiza também no Supabase Auth
+    try {
+      const { data: authData, error: authError } = await supabase.auth.admin.updateUserById(
+        userId,
+        { password: newPassword }
+      );
+
+      if (authError) {
+        console.warn("⚠️ /resetPassword: Erro ao atualizar senha no Supabase Auth:", authError);
+        // Não retornamos erro aqui porque a senha já foi atualizada na tabela users
+      } else {
+        console.log("✅ /resetPassword: Senha atualizada também no Supabase Auth");
+      }
+    } catch (authErr) {
+      console.warn("⚠️ /resetPassword: Exceção ao atualizar Supabase Auth:", authErr);
+      // Não bloqueamos a resposta se falhar no Auth
+    }
+
     res.json({ message: "Senha resetada com sucesso!", data });
   } catch (err) {
     console.error("❌ /resetPassword: Exceção ao resetar senha:", err);

@@ -13,7 +13,7 @@ export default function Register() {
   const handleRegister = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:4000/signup", {
+      const res = await fetch("http://localhost:4000/api/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, name }),

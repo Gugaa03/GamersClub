@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import React from "react";
+import Link from "next/link";
+import { Shield, Mail, Wallet, LogOut } from "lucide-react";
 
 // ============================
 // InputField moderno e memoizado
@@ -118,8 +120,14 @@ export default function ProfilePage() {
         </h1>
 
         <div className="bg-gray-800 p-6 rounded-3xl shadow-xl space-y-6">
-          <p className="text-lg"><strong>Usuário:</strong> {user.email}</p>
-          <p className="text-lg"><strong>Saldo:</strong> €{user.balance.toFixed(2)}</p>
+          <div className="flex items-center gap-3">
+            <Mail className="w-5 h-5 text-blue-400" />
+            <p className="text-lg"><strong>Usuário:</strong> {user.email}</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Wallet className="w-5 h-5 text-green-400" />
+            <p className="text-lg"><strong>Saldo:</strong> €{user.balance.toFixed(2)}</p>
+          </div>
         </div>
 
         <FormSection
@@ -132,22 +140,36 @@ export default function ProfilePage() {
           <InputField type="email" placeholder="Novo email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} />
         </FormSection>
 
-        <FormSection
-          title="Alterar Senha"
-          buttonText="Atualizar Senha"
-          onSubmit={handlePasswordUpdate}
-          loading={loadingPassword}
-          colorClass="bg-green-600"
-        >
-          <InputField type="password" placeholder="Senha antiga" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} />
-          <InputField type="password" placeholder="Nova senha" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
-          <InputField type="password" placeholder="Confirmar nova senha" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
-        </FormSection>
+        {/* Link para página de mudança de senha */}
+        <Link href="/change-password">
+          <div className="bg-gradient-to-r from-purple-600/20 to-blue-600/20 border border-purple-500/50 p-6 rounded-2xl shadow-lg hover:shadow-purple-500/30 transition-all cursor-pointer group">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-purple-600/30 rounded-xl group-hover:bg-purple-600/50 transition">
+                  <Shield className="w-6 h-6 text-purple-400" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold group-hover:text-purple-400 transition">Alterar Senha</h3>
+                  <p className="text-gray-400 text-sm">Mantenha sua conta segura</p>
+                </div>
+              </div>
+              <svg 
+                className="w-6 h-6 text-purple-400 group-hover:translate-x-2 transition-transform" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+          </div>
+        </Link>
 
         <button
           onClick={logout}
-          className="bg-red-600 hover:bg-red-700 px-6 py-3 rounded-xl w-full font-bold transition-all shadow-md hover:shadow-lg"
+          className="bg-red-600 hover:bg-red-700 px-6 py-3 rounded-xl w-full font-bold transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
         >
+          <LogOut className="w-5 h-5" />
           Sair da Conta
         </button>
       </div>
