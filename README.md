@@ -210,9 +210,10 @@ npm run type-check
 
 ## 📸 Screenshots
 
-<img width="1872" height="850" alt="Página inicial com jogos em destaque" src="https://github.com/user-attachments/assets/9b0e18f8-7906-43ca-a05c-8b3ac255be19" />
+<img width="2507" height="1251" alt="image" src="https://github.com/user-attachments/assets/23a73357-458c-478a-b51d-eda6376e7682" />
 
-<img width="1876" height="776" alt="Sistema de carrinho e checkout" src="https://github.com/user-attachments/assets/9da7b28f-4400-4080-8022-dc1935b48cae" />
+<img width="2490" height="1122" alt="image" src="https://github.com/user-attachments/assets/5719afb6-1bfa-4bfb-b54f-e9fc28826307" />
+<img width="2496" height="1274" alt="image" src="https://github.com/user-attachments/assets/c9264500-ceff-4ea3-9c05-b74b7f6c9ac4" />
 
 ---
 
