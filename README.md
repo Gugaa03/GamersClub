@@ -18,16 +18,12 @@ Uma loja de jogos online moderna construída com **Next.js**, **Supabase** e **T
 - 💰 Sistema de saldo e gerenciamento de fundos
 - 📚 Biblioteca de jogos do usuário
 - 🌙 Tema escuro com design moderno usando Tailwind CSS
-- 🔐 Middleware de segurança com Helmet.js
-- ⚡ Rate limiting para proteção contra abuso
-- 📧 Sistema de envio de emails para recibos
+
 
 ### 🚧 Em Desenvolvimento
-- 🔍 Sistema de busca avançado
-- 🎯 Recomendações personalizadas
-- 💬 Sistema de reviews e avaliações
-- 🏆 Sistema de conquistas
-
+- Correção de bugs
+- 🔐 Middleware de segurança com Helmet.js
+- 📧 Sistema de envio de emails para recibos
 ---
 
 ## 🛠 Tecnologias
